@@ -12,11 +12,20 @@ export const openAiRoutes = express.Router();
 openAiRoutes.use(requireAuth);
 openAiRoutes.use(bodyParser.json());
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// The AI board feature is optional. Without OPENAI_API_KEY the server still
+// starts, and this route answers 503 instead of crashing the whole app at boot.
+const openAiApiKey = process.env.OPENAI_API_KEY
+let openai = null
+if (openAiApiKey) {
+    openai = new OpenAI({ apiKey: openAiApiKey })
+} else {
+    console.warn('OPENAI_API_KEY is not set: AI board creation is disabled (503).')
+}
 
 openAiRoutes.post('/', log, async (req, res) => {
+    if (!openai) {
+        return res.status(503).json({ error: 'AI board creation is disabled on this deployment' })
+    }
     try {
         const { title } = req.body;
         const prompt = openAiService.getPrompt(title);
