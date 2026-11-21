@@ -16,7 +16,7 @@ export async function login(req, res) {
         const user = await authService.login(username, password)
         const loginToken = authService.getLoginToken(user)
 
-        logger.info('User login: ', user)
+        logger.info('User login: ' + user._id)
         res.cookie('loginToken', loginToken, COOKIE_OPTIONS)
 
         res.json(user)
@@ -35,7 +35,7 @@ export async function signup(req, res) {
         // logger.debug(fullname + ', ' + username + ', ' + password)
 
         const account = await authService.signup(username, password, fullname, imgUrl)
-        logger.debug(`auth.route - new account created: ` + JSON.stringify(account))
+        logger.info('New account created: ' + account._id)
 
         const user = await authService.login(username, password)
         const loginToken = authService.getLoginToken(user)
@@ -60,7 +60,6 @@ export async function logout(req, res) {
 // user.controller.js
 export function getCurrentUser(req, res) {
     const user = req.user; // Assuming `req.user` contains the authenticated user info
-    console.log(user)
     if (user) {
         res.json(user)
     } else {
