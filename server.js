@@ -16,6 +16,9 @@ const __dirname = dirname(__filename)
 logger.info('server.js loaded...')
 
 const app = express()
+// Render puts one proxy in front of the app. Trusting exactly one hop lets
+// the rate limiter see the real client IP instead of the proxy's.
+app.set('trust proxy', 1)
 const server = http.createServer(app)
 
 // Express App Config
