@@ -13,6 +13,7 @@ React frontend from `public/`.
 | `NODE_ENV` | `production` (set in `render.yaml`). |
 | `NODE_VERSION` | `20` (set in `render.yaml`). |
 | `DB_NAME` | Optional. Defaults to `trellifeDB`. |
+| `GUEST_MODE` | Deliberately not set. When `true`, requests with no login pass as an anonymous Guest. Keep it off on the public demo. |
 | `OPENAI_API_KEY` | Deliberately not set. The AI board route then answers 503 and the button is hidden. |
 
 The server refuses to start if `MONGO_URL` is missing.
