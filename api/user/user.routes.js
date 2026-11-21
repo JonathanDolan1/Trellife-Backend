@@ -9,7 +9,7 @@ const router = express.Router()
 router.get('/', getUsers)
 router.get('/:id', getUser)
 router.put('/:id', requireAuth, updateUser)
-router.post('/remove-board-from-favorites', updateUserFavorites)
+router.post('/remove-board-from-favorites', requireAuth, updateUserFavorites)
 router.delete('/:id', requireAuth, requireAdmin, deleteUser)
 
 export const userRoutes = router

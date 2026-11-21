@@ -61,21 +61,21 @@ async function remove(userId) {
 	}
 }
 
-async function update(user) {
+async function update(userId, user) {
 	try {
-		// peek only updatable fields!
-		const userToSave = {
-			_id: ObjectId.createFromHexString(user._id),
-			username: user.username,
-			fullname: user.fullname,
-			favorites: user.favorites,
-			imgUrl: user.imgUrl
+		// Only these fields can be changed. username, password and isAdmin
+		// are never taken from the request.
+		const userToSave = {}
+		if (typeof user.fullname === 'string') userToSave.fullname = user.fullname
+		if (typeof user.imgUrl === 'string') userToSave.imgUrl = user.imgUrl
+		if (Array.isArray(user.favorites)) {
+			userToSave.favorites = user.favorites.filter(id => typeof id === 'string')
 		}
 		const collection = await dbService.getCollection('user')
-		await collection.updateOne({ _id: userToSave._id }, { $set: userToSave })
-		return userToSave
+		await collection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: userToSave })
+		return getById(userId)
 	} catch (err) {
-		logger.error(`cannot update user ${user._id}`, err)
+		logger.error(`cannot update user ${userId}`, err)
 		throw err
 	}
 }
