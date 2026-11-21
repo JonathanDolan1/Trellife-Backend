@@ -5,6 +5,7 @@ import cors from 'cors'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import compression from 'compression'
+import helmet from 'helmet'
 import { setupAsyncLocalStorage } from './middlewares/setupAls.middleware.js'
 import { logger } from './services/logger.service.js'
 import './config.js'
@@ -23,6 +24,11 @@ app.set('trust proxy', 1)
 const server = http.createServer(app)
 
 // Express App Config
+// Standard security headers (no sniffing, frame protection, HSTS, etc.).
+// The content security policy is off for now: the built app loads images
+// and scripts from several outside hosts, and a wrong policy would break
+// the page. Tightening it is a follow-up.
+app.use(helmet({ contentSecurityPolicy: false }))
 app.use(cookieParser())
 app.use(express.json({ limit: config.maxBodySize }))
 app.use(express.urlencoded({ limit: config.maxBodySize, extended: true }))
