@@ -1,6 +1,15 @@
 import { authService } from './auth.service.js'
 import { logger } from '../../services/logger.service.js'
 
+// httpOnly: page scripts cannot read the cookie. sameSite lax: other sites
+// cannot send it along with their own POST requests. secure: HTTPS only.
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: authService.TOKEN_MAX_AGE_MS,
+}
+
 export async function login(req, res) {
     const { username, password } = req.body
     try {
@@ -8,7 +17,7 @@ export async function login(req, res) {
         const loginToken = authService.getLoginToken(user)
 
         logger.info('User login: ', user)
-        res.cookie('loginToken', loginToken)
+        res.cookie('loginToken', loginToken, COOKIE_OPTIONS)
 
         res.json(user)
     } catch (err) {
@@ -31,7 +40,7 @@ export async function signup(req, res) {
         const user = await authService.login(username, password)
         const loginToken = authService.getLoginToken(user)
 
-        res.cookie('loginToken', loginToken)
+        res.cookie('loginToken', loginToken, COOKIE_OPTIONS)
         res.json(user)
     } catch (err) {
         logger.error('Failed to signup ' + err)
@@ -41,7 +50,7 @@ export async function signup(req, res) {
 
 export async function logout(req, res) {
     try {
-        res.clearCookie('loginToken')
+        res.clearCookie('loginToken', { httpOnly: true, sameSite: 'lax', secure: COOKIE_OPTIONS.secure })
         res.send({ msg: 'Logged out successfully' })
     } catch (err) {
         res.status(500).send({ err: 'Failed to logout' })

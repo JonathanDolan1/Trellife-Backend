@@ -5,11 +5,15 @@ import { userService } from '../user/user.service.js'
 import { logger } from '../../services/logger.service.js'
 import '../../config.js';
 
+// Login tokens (and their cookie) are valid for 7 days.
+const TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+
 export const authService = {
     signup,
     login,
     getLoginToken,
-    validateToken
+    validateToken,
+    TOKEN_MAX_AGE_MS
 }
 
 const cryptr = new Cryptr(process.env.SECRET1)
@@ -38,7 +42,7 @@ async function signup(username, password, fullname, imgUrl) {
 }
 
 function getLoginToken(user) {
-    const userInfo = { _id: user._id, fullname: user.fullname, imgUrl: user.imgUrl }
+    const userInfo = { _id: user._id, fullname: user.fullname, imgUrl: user.imgUrl, issuedAt: Date.now() }
     return cryptr.encrypt(JSON.stringify(userInfo))
 }
 
@@ -46,6 +50,11 @@ function validateToken(loginToken) {
     try {
         const json = cryptr.decrypt(loginToken)
         const loggedinUser = JSON.parse(json)
+        // Tokens from before this change have no issuedAt. They are treated
+        // as expired, so those users simply log in again.
+        if (typeof loggedinUser.issuedAt !== 'number') return null
+        const age = Date.now() - loggedinUser.issuedAt
+        if (age > TOKEN_MAX_AGE_MS) return null
         return loggedinUser
     } catch (err) {
         console.log('Invalid login token')
