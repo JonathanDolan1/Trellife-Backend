@@ -47,8 +47,9 @@ export async function addBoard(req, res) {
 export async function updateBoard(req, res) {
     const { loggedinUser } = req
     try {
-        const board = req.body
-        const updatedBoard = await boardService.update(board)
+        const boardId = req.params.id
+        const changes = req.body
+        const updatedBoard = await boardService.update(boardId, changes, loggedinUser)
         socketService.broadcast({ type: 'watched-board-updated', data: updatedBoard, room: updatedBoard._id, userId: loggedinUser._id })
         res.json(updatedBoard)
     } catch (err) {

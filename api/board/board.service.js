@@ -154,19 +154,41 @@ async function add(board, loggedinUser) {
     }
 }
 
-async function update(board) {
+// The only members change a caller may make is adding themselves (the
+// "Join" button). Existing members are kept and nobody else can be added.
+function _membersAfterUpdate(originalMembers, incomingMembers, loggedinUser) {
+    const members = [...(originalMembers || [])]
+    if (!Array.isArray(incomingMembers)) return members
+
+    const alreadyMember = members.some(member => member._id === loggedinUser._id)
+    if (alreadyMember) return members
+
+    const wantsToJoin = incomingMembers.some(member => member && member._id === loggedinUser._id)
+    if (!wantsToJoin) return members
+
+    members.push({ _id: loggedinUser._id, fullname: loggedinUser.fullname, imgUrl: loggedinUser.imgUrl })
+    return members
+}
+
+async function update(boardId, changes, loggedinUser) {
     try {
         const collection = await dbService.getCollection('board')
-        const originalBoard = await collection.findOne({ _id: ObjectId.createFromHexString(board._id) })
+        const mongoId = ObjectId.createFromHexString(boardId)
+        const originalBoard = await collection.findOne({ _id: mongoId })
 
         if (!originalBoard) {
-            throw new Error(`Board with id ${board._id} not found`);
+            throw new Error(`Board with id ${boardId} not found`);
         }
 
-        const updatedBoard = { ...originalBoard, ...board };
+        const updatedBoard = { ...originalBoard, ...changes };
+        // Fields a caller must never overwrite through an update.
+        updatedBoard.createdBy = originalBoard.createdBy
+        updatedBoard.members = _membersAfterUpdate(originalBoard.members, changes.members, loggedinUser)
         delete updatedBoard._id;
-        await collection.updateOne({ _id: ObjectId.createFromHexString(board._id) }, { $set: updatedBoard })
-        return board
+
+        await collection.updateOne({ _id: mongoId }, { $set: updatedBoard })
+        updatedBoard._id = boardId
+        return updatedBoard
     } catch (err) {
         logger.error(`cannot update board:`, err)
         throw err
