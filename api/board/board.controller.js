@@ -5,7 +5,7 @@ import { socketService } from '../../services/socket.service.js'
 export async function getBoards(req, res) {
     try {
         const filterBy = {
-            title: req.query.title || '',
+            title: typeof req.query.title === 'string' ? req.query.title.slice(0, 100) : '',
         }
         const sortBy = {
             field: req.query.field || '',

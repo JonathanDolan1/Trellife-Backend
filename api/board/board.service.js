@@ -16,7 +16,7 @@ async function query(filterBy = {}, sortBy = {}) {
     try {
         const criteria = {}
         if (filterBy.title) {
-            criteria.title = { $regex: filterBy.title, $options: 'i' }
+            criteria.title = { $regex: utilService.escapeRegex(filterBy.title), $options: 'i' }
         }
 
         const collection = await dbService.getCollection('board')

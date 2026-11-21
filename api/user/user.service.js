@@ -2,6 +2,7 @@ import { dbService } from '../../services/db.service.js'
 import { logger } from '../../services/logger.service.js'
 
 import { ObjectId } from 'mongodb'
+import { utilService } from '../../services/util.service.js'
 
 export const userService = {
 	query,
@@ -126,7 +127,7 @@ async function removeBoardFromFavorites(boardId) {
 function _buildCriteria(filterBy) {
 	const criteria = {}
 	if (filterBy.txt) {
-		const txtCriteria = { $regex: filterBy.txt, $options: 'i' }
+		const txtCriteria = { $regex: utilService.escapeRegex(String(filterBy.txt)), $options: 'i' }
 		criteria.$or = [
 			{
 				username: txtCriteria,

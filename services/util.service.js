@@ -1,5 +1,12 @@
 export const utilService = {
     makeId,
+    escapeRegex,
+}
+
+// Makes user text match literally inside a Mongo $regex (no wildcards,
+// no catastrophic patterns).
+function escapeRegex(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function makeId(length = 5) {

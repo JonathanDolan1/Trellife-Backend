@@ -18,7 +18,21 @@ export const authService = {
 
 const cryptr = new Cryptr(process.env.SECRET1)
 
+// Rejects anything that is not a plain string of sensible length, so a
+// JSON object like {"$ne": null} can never reach a Mongo query.
+// bcrypt only uses the first 72 bytes of a password, hence that limit.
+function _requireText(value, fieldName, maxLength) {
+    if (typeof value !== 'string' || value.length === 0) {
+        throw new Error(`Missing or invalid ${fieldName}`)
+    }
+    if (Buffer.byteLength(value) > maxLength) {
+        throw new Error(`${fieldName} is too long`)
+    }
+}
+
 async function login(username, password) {
+    _requireText(username, 'username', 50)
+    _requireText(password, 'password', 72)
     logger.debug(`auth.service - login with username: ${username}`)
 
     const user = await userService.getByUsername(username)
@@ -35,7 +49,10 @@ async function signup(username, password, fullname, imgUrl) {
     const saltRounds = 10
 
     logger.debug(`auth.service - signup with username: ${username}, fullname: ${fullname}`)
-    if (!username || !password || !fullname) throw new Error('Missing details')
+    _requireText(username, 'username', 50)
+    _requireText(password, 'password', 72)
+    _requireText(fullname, 'fullname', 100)
+    if (imgUrl !== undefined && typeof imgUrl !== 'string') throw new Error('Invalid imgUrl')
 
     const hash = await bcrypt.hash(password, saltRounds)
     return userService.add({ username, password: hash, fullname, imgUrl })
