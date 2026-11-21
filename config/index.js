@@ -24,7 +24,9 @@ config.authRateLimit = {
 // Largest JSON or form body the server accepts.
 config.maxBodySize = '2mb'
 // Browser origins allowed to call the API and open sockets in production.
-config.allowedOrigins = ['https://trellife.onrender.com']
+// Jonathan's own Render service. trellife.onrender.com is the original
+// team demo (Dolev's), which has no reason to call this API.
+config.allowedOrigins = ['https://trellife-t8ap.onrender.com']
 const devOrigins = [
   'http://127.0.0.1:5173',
   'http://localhost:5173',

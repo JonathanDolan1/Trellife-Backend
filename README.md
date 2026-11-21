@@ -28,7 +28,8 @@ Built with:
 
 ## Security pass (November 2026)
 
-A review of this public demo, done by Jonathan Dolan with AI-assisted code
+A review of this fork and its deploy at https://trellife-t8ap.onrender.com
+(the link above is the original team demo), done by Jonathan Dolan with AI-assisted code
 review (Codex and Claude) and every finding checked by hand against the code.
 Fixes are on the `security-pass` branch of this repo and of
 [the frontend](https://github.com/JonathanDolan1/Trellife), one commit per fix,
