@@ -1,3 +1,4 @@
+import { logger } from '../../services/logger.service.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 import { requireAuth } from '../../middlewares/requireAuth.middleware.js';
@@ -48,20 +49,13 @@ openAiRoutes.post('/', log, async (req, res) => {
             }
             res.json(responseObject);  // Send as JSON response
         } catch (jsonError) {
-            console.error('Invalid JSON:', messageContent);
-            res.status(500).json({
-                error: 'Invalid JSON response from OpenAI',
-                details: jsonError.message,
-                content: messageContent
-            });
+            // Details stay in the server log, never in the response.
+            logger.error('AI route: invalid JSON from OpenAI', jsonError.message)
+            res.status(502).json({ error: 'The AI answer could not be read, please try again' });
         }
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({
-            error: 'Internal Server Error',
-            details: error.message,
-            stack: error.stack
-        });
+        logger.error('AI route failed', error.message)
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
