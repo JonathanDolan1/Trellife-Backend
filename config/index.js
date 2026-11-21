@@ -10,6 +10,9 @@ if (process.env.NODE_ENV === 'production') {
   config = configDev
 }
 
-config.isGuestMode = true
+// Guest mode lets requests with no login through as an anonymous "Guest".
+// Off unless GUEST_MODE=true. The public demo logs in as a real Guest
+// account instead, so it does not need this.
+config.isGuestMode = process.env.GUEST_MODE === 'true'
 
 
