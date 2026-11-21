@@ -1,12 +1,13 @@
 import { logger } from './logger.service.js'
 import { Server } from 'socket.io'
+import { getAllowedOrigins } from '../config/index.js'
 
 var gIo = null
 
 export function setupSocketAPI(http) {
     gIo = new Server(http, {
         cors: {
-            origin: '*',
+            origin: getAllowedOrigins(),
         }
     })
     gIo.on('connection', socket => {

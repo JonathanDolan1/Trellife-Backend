@@ -25,5 +25,16 @@ config.authRateLimit = {
 config.maxBodySize = '2mb'
 // Browser origins allowed to call the API and open sockets in production.
 config.allowedOrigins = ['https://trellife.onrender.com']
+const devOrigins = [
+  'http://127.0.0.1:5173',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://localhost:3000',
+]
+
+export function getAllowedOrigins() {
+  if (process.env.NODE_ENV === 'production') return config.allowedOrigins
+  return [...config.allowedOrigins, ...devOrigins]
+}
 
 

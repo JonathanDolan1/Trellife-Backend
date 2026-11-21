@@ -8,6 +8,7 @@ import compression from 'compression'
 import { setupAsyncLocalStorage } from './middlewares/setupAls.middleware.js'
 import { logger } from './services/logger.service.js'
 import './config.js'
+import { config, getAllowedOrigins } from './config/index.js'
 
 
 const __filename = fileURLToPath(import.meta.url)
@@ -23,28 +24,22 @@ const server = http.createServer(app)
 
 // Express App Config
 app.use(cookieParser())
-app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ limit: '50mb', extended: true }))
+app.use(express.json({ limit: config.maxBodySize }))
+app.use(express.urlencoded({ limit: config.maxBodySize, extended: true }))
 app.use(express.static('public'))
 app.use(compression())
 
+// Production allows only the deployed site; local dev also allows the
+// Vite and test ports.
 const corsOptions = {
-    origin: [
-        'http://127.0.0.1:5173',
-        'http://localhost:5173',
-        'http://127.0.0.1:3000',
-        'http://localhost:3000',
-        'https://trellife.onrender.com',
-    ],
+    origin: getAllowedOrigins(),
     credentials: true,
 }
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.resolve(__dirname, 'public')))
-    app.use(cors(corsOptions))
-} else {
-    app.use(cors(corsOptions))
 }
+app.use(cors(corsOptions))
 
 // Routes and Socket
 import { authRoutes } from './api/auth/auth.routes.js'
